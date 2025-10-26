@@ -1,0 +1,228 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct account {
+    int acc_no;
+    char name[50];
+    char acc_type[10];
+    char phone[15];
+    char address[100];
+    int pin;
+    float balance;
+};
+
+struct account customers[100];
+int count = 0;
+int next_acc_no = 1001; // auto-generated account numbers start here
+
+void createAccount() {
+    struct account a;
+
+    a.acc_no = next_acc_no++;
+    printf("\nEnter customer name: ");
+    scanf(" %[^\n]", a.name);
+    printf("Enter account type (Savings/Current): ");
+    scanf("%s", a.acc_type);
+    printf("Enter phone number: ");
+    scanf("%s", a.phone);
+    printf("Enter address: ");
+    scanf(" %[^\n]", a.address);
+    printf("Set a 4-digit PIN: ");
+    scanf("%d", &a.pin);
+    printf("Enter initial deposit amount: ");
+    scanf("%f", &a.balance);
+
+    customers[count++] = a;
+
+    printf("\n✅ Account created successfully!\n");
+    printf("Your account number is: %d\n", a.acc_no);
+}
+
+int findAccount(int acc_no) {
+    for (int i = 0; i < count; i++) {
+        if (customers[i].acc_no == acc_no)
+            return i;
+    }
+    return -1;
+}
+
+void withdrawMoney() {
+    int acc_no, pin, index;
+    float amount;
+    char type[10];
+
+    printf("\nEnter your account number: ");
+    scanf("%d", &acc_no);
+    index = findAccount(acc_no);
+
+    if (index == -1) {
+        printf("❌ Account not found!\n");
+        return;
+    }
+
+    printf("Enter account type (Savings/Current): ");
+    scanf("%s", type);
+
+    if (strcasecmp(type, customers[index].acc_type) != 0) {
+        printf("❌ Account type mismatch!\n");
+        return;
+    }
+
+    printf("Enter amount to withdraw: ");
+    scanf("%f", &amount);
+
+    printf("Enter your 4-digit PIN: ");
+    scanf("%d", &pin);
+
+    if (pin != customers[index].pin) {
+        printf("❌ Incorrect PIN!\n");
+        return;
+    }
+
+    if (amount > customers[index].balance) {
+        printf("❌ Insufficient balance!\n");
+    } else {
+        customers[index].balance -= amount;
+        printf("✅ Withdrawal successful!\n");
+        printf("Remaining balance: %.2f\n", customers[index].balance);
+    }
+}
+
+void depositMoney() {
+    int choice;
+    printf("\n1. Own Account Deposit\n2. Third Person Deposit\nEnter choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        int acc_no, pin, index;
+        float amount;
+
+        printf("Enter your account number: ");
+        scanf("%d", &acc_no);
+        index = findAccount(acc_no);
+
+        if (index == -1) {
+            printf("❌ Account not found!\n");
+            return;
+        }
+
+        printf("Enter your 4-digit PIN: ");
+        scanf("%d", &pin);
+
+        if (pin != customers[index].pin) {
+            printf("❌ Incorrect PIN!\n");
+            return;
+        }
+
+        printf("Enter deposit amount: ");
+        scanf("%f", &amount);
+
+        customers[index].balance += amount;
+        printf("✅ Amount deposited successfully!\n");
+        printf("Updated balance: %.2f\n", customers[index].balance);
+    }
+
+    else if (choice == 2) {
+        int acc_no, index;
+        float amount;
+
+        printf("Enter recipient's account number: ");
+        scanf("%d", &acc_no);
+        index = findAccount(acc_no);
+
+        if (index == -1) {
+            printf("❌ Recipient account not found!\n");
+            return;
+        }
+
+        printf("Enter amount to deposit: ");
+        scanf("%f", &amount);
+
+        customers[index].balance += amount;
+        printf("✅ Third-person deposit successful!\n");
+        printf("Recipient’s new balance: %.2f\n", customers[index].balance);
+    }
+
+    else {
+        printf("❌ Invalid choice!\n");
+    }
+}
+
+void balanceEnquiry() {
+    int acc_no, pin, index;
+
+    printf("\nEnter your account number: ");
+    scanf("%d", &acc_no);
+    index = findAccount(acc_no);
+
+    if (index == -1) {
+        printf("❌ Account not found!\n");
+        return;
+    }
+
+    printf("Enter your 4-digit PIN: ");
+    scanf("%d", &pin);
+
+    if (pin != customers[index].pin) {
+        printf("❌ Incorrect PIN!\n");
+        return;
+    }
+
+    printf("\n====== ACCOUNT DETAILS ======\n");
+    printf("Name: %s\n", customers[index].name);
+    printf("Account No: %d\n", customers[index].acc_no);
+    printf("Account Type: %s\n", customers[index].acc_type);
+    printf("Phone: %s\n", customers[index].phone);
+    printf("Address: %s\n", customers[index].address);
+    printf("Balance: %.2f\n", customers[index].balance);
+    printf("=============================\n");
+}
+
+void accessAccount() {
+    int choice;
+
+    while (1) {
+        printf("\n---- ACCOUNT MENU ----\n");
+        printf("1. Withdraw Money\n");
+        printf("2. Deposit Money\n");
+        printf("3. Balance Enquiry\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: withdrawMoney(); break;
+            case 2: depositMoney(); break;
+            case 3: balanceEnquiry(); break;
+            case 4:
+                printf("\nThank you for using our bank service!\n");
+                exit(0); // stops program immediately
+            default:
+                printf("❌ Invalid choice!\n");
+        }
+    }
+}
+
+int main() {
+    int choice;
+
+    while (1) {
+        printf("\n====== BANK MANAGEMENT SYSTEM ======\n");
+        printf("1. Create New Account\n");
+        printf("2. Access Existing Account\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: createAccount(); break;
+            case 2: accessAccount(); break;
+            case 3:
+                printf("\nThank you for visiting our bank!\n");
+                exit(0); // stops program immediately
+            default:
+                printf("❌ Invalid choice! Try again.\n");
+        }
+    }
+}
